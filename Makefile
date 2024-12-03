@@ -1,4 +1,4 @@
-YEAR=2023
+YEAR=2024
 
 # Aliases for executables
 CARGO ?= cargo
