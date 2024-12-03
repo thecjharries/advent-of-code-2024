@@ -22,15 +22,80 @@ fn main() {
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let mut first = Vec::<usize>::new();
+    let mut second = Vec::<usize>::new();
+    for line in input.lines() {
+        let numbers = line
+            .trim()
+            .split_whitespace()
+            .map(|number| number.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
+        first.push(numbers[0]);
+        second.push(numbers[1]);
+    }
+    first.sort();
+    second.sort();
+    return first
+        .iter()
+        .zip(second.iter())
+        .map(|(first, second)| first.abs_diff(*second))
+        .sum();
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let mut first = Vec::<usize>::new();
+    let mut second = Vec::<usize>::new();
+    for line in input.lines() {
+        let numbers = line
+            .trim()
+            .split_whitespace()
+            .map(|number| number.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
+        first.push(numbers[0]);
+        second.push(numbers[1]);
+    }
+    first.sort();
+    second.sort();
+    return first
+        .iter()
+        .map(|first| second.iter().filter(|&second| second == first).count() * first)
+        .sum();
 }
 
 #[cfg(not(tarpaulin_include))]
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn part1_should_handle_example() {
+        assert_eq!(
+            11,
+            part1(
+                "3   4
+4   3
+2   5
+1   3
+3   9
+3   3"
+                    .to_string(),
+            )
+        );
+    }
+
+    #[test]
+    fn part2_should_handle_example() {
+        assert_eq!(
+            31,
+            part2(
+                "3   4
+4   3
+2   5
+1   3
+3   9
+3   3"
+                    .to_string(),
+            )
+        );
+    }
 }
