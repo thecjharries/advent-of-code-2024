@@ -84,4 +84,4 @@ submit:
 finish: coverage submit clean
 	$(GIT) push -u origin feat/day-$(DAY)
 	$(GH) pr create --fill
-	$(GH) pr merge --merge --delete-branch
+	$(GH) pr merge --squash --delete-branch
