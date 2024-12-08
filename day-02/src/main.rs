@@ -21,15 +21,18 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
-fn is_level_safe(level: &str) -> bool {
-    let levels = level
+fn parse_level_str(level: &str) -> Vec<usize> {
+    level
         .split_whitespace()
         .collect::<Vec<&str>>()
         .into_iter()
         .map(|part| part.parse::<usize>().unwrap())
-        .collect::<Vec<usize>>();
-    for index in 1..levels.len() {
-        if 3 < levels[index].abs_diff(levels[index - 1]) || levels[index] == levels[index - 1] {
+        .collect::<Vec<usize>>()
+}
+
+fn is_level_safe(levels: Vec<usize>) -> bool {
+    for index in 0..levels.len() - 1 {
+        if 3 < levels[index].abs_diff(levels[index + 1]) || levels[index] == levels[index + 1] {
             return false;
         }
     }
@@ -44,12 +47,31 @@ fn is_level_safe(level: &str) -> bool {
 fn part1(input: String) -> usize {
     input
         .lines()
-        .filter(|line| is_level_safe(line))
+        .filter(|line| is_level_safe(parse_level_str(line)))
         .count()
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    input
+        .lines()
+        .filter(|line| {
+            let levels = parse_level_str(line);
+            if is_level_safe(levels.clone()) {
+                return true;
+            } else {
+                let mut safe = false;
+                for index in 0..levels.len() {
+                    let mut removed = levels[0..index].to_vec();
+                    removed.extend(levels[index + 1..].to_vec());
+                    if is_level_safe(removed) {
+                        safe = true;
+                        break;
+                    }
+                }
+                return safe;
+            }
+        })
+        .count()
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -59,11 +81,21 @@ mod tests {
 
     #[test]
     fn test_is_level_safe() {
-        assert!(is_level_safe("7 6 4 2 1"));
-        assert!(!is_level_safe("1 2 7 8 9"));
-        assert!(!is_level_safe("9 7 6 2 1"));
-        assert!(!is_level_safe("1 3 2 4 5"));
-        assert!(!is_level_safe("8 6 4 4 1"));
-        assert!(is_level_safe("1 3 6 7 9"));
+        assert!(is_level_safe(parse_level_str("7 6 4 2 1")));
+        assert!(!is_level_safe(parse_level_str("1 2 7 8 9")));
+        assert!(!is_level_safe(parse_level_str("9 7 6 2 1")));
+        assert!(!is_level_safe(parse_level_str("1 3 2 4 5")));
+        assert!(!is_level_safe(parse_level_str("8 6 4 4 1")));
+        assert!(is_level_safe(parse_level_str("1 3 6 7 9")));
+    }
+
+    #[test]
+    fn test_part2() {
+        assert!(part2("7 6 4 2 1".to_string()) > 0);
+        assert!(part2("1 2 7 8 9".to_string()) == 0);
+        assert!(part2("9 7 6 2 1".to_string()) == 0);
+        assert!(part2("1 3 2 4 5".to_string()) > 0);
+        assert!(part2("8 6 4 4 1".to_string()) > 0);
+        assert!(part2("1 3 6 7 9".to_string()) > 0);
     }
 }
