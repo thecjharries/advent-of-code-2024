@@ -90,6 +90,11 @@ mod tests {
     }
 
     #[test]
+    fn test_part1() {
+        assert!(part1("7 6 4 2 1\n1 2 7 8 9\n9 7 6 2 1\n1 3 2 4 5\n8 6 4 4 1\n1 3 6 7 9".to_string()) == 2);
+    }
+
+    #[test]
     fn test_part2() {
         assert!(part2("7 6 4 2 1".to_string()) > 0);
         assert!(part2("1 2 7 8 9".to_string()) == 0);
