@@ -50,7 +50,10 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let remove_pattern = Regex::new(r"don't\(\).*?do\(\)|don't\(\).*$").unwrap();
+    let single_line = input.replace("\n", "");
+    let cleaned = remove_pattern.replace_all(&single_line, "");
+    part1(cleaned.to_string())
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -63,5 +66,12 @@ mod tests {
         let input =
             "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))".to_string();
         assert_eq!(161, part1(input));
+    }
+
+    #[test]
+    fn test_part2() {
+        let input =
+            "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))".to_string();
+        assert_eq!(48, part2(input));
     }
 }
