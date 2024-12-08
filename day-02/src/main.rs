@@ -21,6 +21,26 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
+fn is_level_safe(level: &str) -> bool {
+    let levels = level
+        .split_whitespace()
+        .collect::<Vec<&str>>()
+        .into_iter()
+        .map(|part| part.parse::<usize>().unwrap())
+        .collect::<Vec<usize>>();
+    for index in 1..levels.len() {
+        if 3 < levels[index].abs_diff(levels[index - 1]) || levels[index] == levels[index - 1] {
+            return false;
+        }
+    }
+    let mut sorted = levels.clone();
+    sorted.sort();
+    if levels[0] > levels[1] && levels[1] > levels[2] {
+        sorted.reverse();
+    }
+    return levels == sorted;
+}
+
 fn part1(input: String) -> usize {
     todo!()
 }
@@ -33,4 +53,14 @@ fn part2(input: String) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_is_level_safe() {
+        assert!(is_level_safe("7 6 4 2 1"));
+        assert!(!is_level_safe("1 2 7 8 9"));
+        assert!(!is_level_safe("9 7 6 2 1"));
+        assert!(!is_level_safe("1 3 2 4 5"));
+        assert!(!is_level_safe("8 6 4 4 1"));
+        assert!(is_level_safe("1 3 6 7 9"));
+    }
 }
