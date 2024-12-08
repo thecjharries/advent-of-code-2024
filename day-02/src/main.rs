@@ -42,7 +42,10 @@ fn is_level_safe(level: &str) -> bool {
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    input
+        .lines()
+        .filter(|line| is_level_safe(line))
+        .count()
 }
 
 fn part2(input: String) -> usize {
