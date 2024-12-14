@@ -86,7 +86,43 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let grid = convert_input_to_2d_array(input);
+    let mut count = 0;
+    for row in 1..grid.len() - 1 {
+        for column in 1..grid[row].len() - 1 {
+            if 'A' == grid[row][column] {
+                if 'M' == grid[row - 1][column - 1]
+                    && 'S' == grid[row + 1][column + 1]
+                    && 'M' == grid[row + 1][column - 1]
+                    && 'S' == grid[row - 1][column + 1]
+                {
+                    count += 1;
+                }
+                if 'S' == grid[row - 1][column - 1]
+                    && 'M' == grid[row + 1][column + 1]
+                    && 'M' == grid[row + 1][column - 1]
+                    && 'S' == grid[row - 1][column + 1]
+                {
+                    count += 1;
+                }
+                if 'M' == grid[row - 1][column - 1]
+                    && 'S' == grid[row + 1][column + 1]
+                    && 'S' == grid[row + 1][column - 1]
+                    && 'M' == grid[row - 1][column + 1]
+                {
+                    count += 1;
+                }
+                if 'S' == grid[row - 1][column - 1]
+                    && 'M' == grid[row + 1][column + 1]
+                    && 'S' == grid[row + 1][column - 1]
+                    && 'M' == grid[row - 1][column + 1]
+                {
+                    count += 1;
+                }
+            }
+        }
+    }
+    count
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -119,6 +155,26 @@ XXAMMXXAMA"
         assert_eq!(
             18,
             part1(
+                "MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX"
+                    .to_string()
+            )
+        )
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(
+            9,
+            part2(
                 "MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
