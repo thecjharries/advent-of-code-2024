@@ -29,7 +29,59 @@ fn convert_input_to_2d_array(input: String) -> Vec<Vec<char>> {
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let grid = convert_input_to_2d_array(input);
+    let mut count = 0;
+    for row in 0..grid.len() {
+        for column in 0..grid[row].len() {
+            if 'X' == grid[row][column] {
+                for row_offset in -1..=1 {
+                    for column_offset in -1..=1 {
+                        if row_offset == 0 && column_offset == 0 {
+                            continue;
+                        }
+                        let new_row = row as i32 + row_offset;
+                        let new_column = column as i32 + column_offset;
+                        if new_row < 0
+                            || new_row >= grid.len() as i32
+                            || new_column < 0
+                            || new_column >= grid[row].len() as i32
+                        {
+                            continue;
+                        }
+                        if 'M' != grid[new_row as usize][new_column as usize] {
+                            continue;
+                        }
+                        let new_row = row as i32 + 2 * row_offset;
+                        let new_column = column as i32 + 2 * column_offset;
+                        if new_row < 0
+                            || new_row >= grid.len() as i32
+                            || new_column < 0
+                            || new_column >= grid[row].len() as i32
+                        {
+                            continue;
+                        }
+                        if 'A' != grid[new_row as usize][new_column as usize] {
+                            continue;
+                        }
+                        let new_row = row as i32 + 3 * row_offset;
+                        let new_column = column as i32 + 3 * column_offset;
+                        if new_row < 0
+                            || new_row >= grid.len() as i32
+                            || new_column < 0
+                            || new_column >= grid[row].len() as i32
+                        {
+                            continue;
+                        }
+                        if 'S' != grid[new_row as usize][new_column as usize] {
+                            continue;
+                        }
+                        count += 1;
+                    }
+                }
+            }
+        }
+    }
+    count
 }
 
 fn part2(input: String) -> usize {
@@ -48,7 +100,8 @@ MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
 XMASAMXAMM
-XXAMMXXAMA".to_string();
+XXAMMXXAMA"
+            .to_string();
         let expected = vec![
             vec!['M', 'M', 'M', 'S', 'X', 'X', 'M', 'A', 'S', 'M'],
             vec!['M', 'S', 'A', 'M', 'X', 'M', 'S', 'M', 'S', 'A'],
