@@ -21,6 +21,13 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
+fn convert_input_to_2d_array(input: String) -> Vec<Vec<char>> {
+    input
+        .split("\n")
+        .map(|line| line.chars().collect())
+        .collect()
+}
+
 fn part1(input: String) -> usize {
     todo!()
 }
@@ -33,6 +40,25 @@ fn part2(input: String) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ensure_array_conversion_works() {
+        let input = "MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA".to_string();
+        let expected = vec![
+            vec!['M', 'M', 'M', 'S', 'X', 'X', 'M', 'A', 'S', 'M'],
+            vec!['M', 'S', 'A', 'M', 'X', 'M', 'S', 'M', 'S', 'A'],
+            vec!['A', 'M', 'X', 'S', 'X', 'M', 'A', 'A', 'M', 'M'],
+            vec!['M', 'S', 'A', 'M', 'A', 'S', 'M', 'S', 'M', 'X'],
+            vec!['X', 'M', 'A', 'S', 'A', 'M', 'X', 'A', 'M', 'M'],
+            vec!['X', 'X', 'A', 'M', 'M', 'X', 'X', 'A', 'M', 'A'],
+        ];
+        assert_eq!(expected, convert_input_to_2d_array(input));
+    }
 
     #[test]
     fn test_part1() {
