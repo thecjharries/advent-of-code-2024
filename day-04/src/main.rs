@@ -23,6 +23,7 @@ fn main() {
 
 fn convert_input_to_2d_array(input: String) -> Vec<Vec<char>> {
     input
+        .trim()
         .split("\n")
         .map(|line| line.chars().collect())
         .collect()
