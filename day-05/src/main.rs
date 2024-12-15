@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
 use std::fs::read_to_string;
 
 #[cfg(not(tarpaulin_include))]
@@ -21,8 +22,87 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+struct Rule {
+    number: usize,
+    before: Vec<usize>,
+}
+
+impl Rule {
+    pub fn new_from_line(line: &str) -> Self {
+        let mut parts = line.split("|");
+        let number: usize = parts.next().unwrap().parse().unwrap();
+        let before_entry: usize = parts.next().unwrap().parse().unwrap();
+        return Rule {
+            number,
+            before: vec![before_entry],
+        };
+    }
+
+    pub fn add_before_from_entry(&mut self, entry: &str) {
+        let mut parts = entry.split("|");
+        let number: usize = parts.next().unwrap().parse().unwrap();
+        if number != self.number {
+            return;
+        }
+        let before_entry: usize = parts.next().unwrap().parse().unwrap();
+        self.before.push(before_entry);
+    }
+
+    pub fn add_before_from_rule(&mut self, rule: Rule) {
+        if rule.number != self.number {
+            return;
+        }
+        self.before.extend(rule.before.iter());
+    }
+}
+
 fn part1(input: String) -> usize {
-    todo!()
+    let input = input.trim();
+    let mut sections = input.split("\n\n");
+    let rules_section = sections.next().unwrap().split("\n");
+    let mut rules: HashMap<usize, Rule> = HashMap::new();
+    for rule_line in rules_section {
+        let mut rule = Rule::new_from_line(rule_line);
+        if rules.contains_key(&rule.number) {
+            let existing_rule = rules.get(&rule.number).unwrap();
+            rule.add_before_from_rule(existing_rule.clone());
+            rules.insert(rule.number, rule);
+        } else {
+            rules.insert(rule.number, rule);
+        }
+    }
+    print!("Rules: {:?}\n", rules);
+    let messages = sections.next().unwrap().split("\n");
+    let mut count = 0;
+    for message in messages {
+        let sequence: Vec<usize> = message.split(",").map(|x| x.parse().unwrap()).collect();
+        print!("Checking sequence: {:?}\n", sequence);
+        let mut valid = true;
+        for i in 0..sequence.len() - 1 {
+            let current = sequence[i];
+            if !rules.contains_key(&current) {
+                valid = false;
+                break;
+            }
+            let rule = rules.get(&current).unwrap();
+            let remaining = &sequence[i + 1..];
+            for next in remaining {
+                if !rule.before.contains(next) {
+                    valid = false;
+                    break;
+                    print!("{} -> {} is invalid\n", current, next);
+                }
+            }
+            if !valid {
+                break;
+            }
+        }
+        if valid {
+            count += sequence[sequence.len() / 2];
+        }
+    }
+    count
 }
 
 fn part2(input: String) -> usize {
