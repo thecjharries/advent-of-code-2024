@@ -35,6 +35,33 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_rule_new_from_line() {
+        let rule = Rule::new_from_line("47|53");
+        assert_eq!(47, rule.number);
+        assert_eq!(vec![53], rule.before);
+    }
+
+    #[test]
+    fn test_rule_add_before() {
+        let mut rule = Rule::new_from_line("47|53");
+        rule.add_before_from_entry("97|13");
+        assert_eq!(vec![53], rule.before);
+        rule.add_before_from_entry("47|13");
+        assert_eq!(vec![53, 13], rule.before);
+    }
+
+    #[test]
+    fn test_rule_add_rule() {
+        let mut rule = Rule::new_from_line("47|53");
+        let other_rule = Rule::new_from_line("47|13");
+        rule.add_before_from_rule(other_rule);
+        assert_eq!(vec![53, 13], rule.before);
+        let other_rule = Rule::new_from_line("53|29");
+        rule.add_before_from_rule(other_rule);
+        assert_eq!(vec![53, 13], rule.before);
+    }
+
+    #[test]
     fn test_part1() {
         assert_eq!(
             143,
