@@ -162,9 +162,6 @@ fn part2(input: String) -> usize {
             })
             .collect::<Vec<Rule>>();
         message_rules.sort_by(|a, b| {
-            if a.number == b.number {
-                return Ordering::Equal;
-            }
             if a.before.contains(&b.number) {
                 return Ordering::Less;
             }
