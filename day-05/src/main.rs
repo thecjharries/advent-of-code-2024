@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::read_to_string;
 
@@ -104,7 +105,74 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let input = input.trim();
+    let mut sections = input.split("\n\n");
+    let rules_section = sections.next().unwrap().split("\n");
+    let mut rules: HashMap<usize, Rule> = HashMap::new();
+    for rule_line in rules_section {
+        let mut rule = Rule::new_from_line(rule_line);
+        if rules.contains_key(&rule.number) {
+            let existing_rule = rules.get(&rule.number).unwrap();
+            rule.add_before_from_rule(existing_rule.clone());
+            rules.insert(rule.number, rule);
+        } else {
+            rules.insert(rule.number, rule);
+        }
+    }
+    let messages = sections.next().unwrap().split("\n");
+    let mut available_messages = Vec::new();
+    for message in messages {
+        let sequence: Vec<usize> = message.split(",").map(|x| x.parse().unwrap()).collect();
+        let mut valid = true;
+        for i in 0..sequence.len() - 1 {
+            let current = sequence[i];
+            if !rules.contains_key(&current) {
+                valid = false;
+                break;
+            }
+            let rule = rules.get(&current).unwrap();
+            let remaining = &sequence[i + 1..];
+            for next in remaining {
+                if !rule.before.contains(next) {
+                    valid = false;
+                    break;
+                    print!("{} -> {} is invalid\n", current, next);
+                }
+            }
+            if !valid {
+                break;
+            }
+        }
+        if !valid {
+            available_messages.push(sequence);
+        }
+    }
+    let mut count = 0;
+    for message in available_messages {
+        let mut message_rules = message
+            .iter()
+            .map(|x| {
+                if rules.contains_key(x) {
+                    return rules.get(x).unwrap().clone();
+                }
+                return Rule {
+                    number: *x,
+                    before: Vec::new(),
+                };
+            })
+            .collect::<Vec<Rule>>();
+        message_rules.sort_by(|a, b| {
+            if a.number == b.number {
+                return Ordering::Equal;
+            }
+            if a.before.contains(&b.number) {
+                return Ordering::Less;
+            }
+            return Ordering::Greater;
+        });
+        count += message_rules[message_rules.len() / 2].number;
+    }
+    count
 }
 
 #[cfg(not(tarpaulin_include))]
