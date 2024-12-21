@@ -22,14 +22,42 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
+enum Direction {
+    North,
+    East,
+    South,
+    West,
+}
+
+impl Direction {
+    pub fn walk(&self, coordinate: &Coordinate) -> Coordinate {
+        let (dx, dy) = match self {
+            Self::North => (0, -1),
+            Self::East => (1, 0),
+            Self::South => (0, 1),
+            Self::West => (-1, 0),
+        };
+        Coordinate::new(coordinate.x + dx, coordinate.y + dy)
+    }
+    pub fn turn_right(&self) -> Self {
+        match self {
+            Self::North => Self::East,
+            Self::East => Self::South,
+            Self::South => Self::West,
+            Self::West => Self::North,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 struct Coordinate {
-    x: usize,
-    y: usize,
+    x: i32,
+    y: i32,
 }
 
 impl Coordinate {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 }
@@ -43,7 +71,7 @@ enum GridContent {
 #[derive(Debug)]
 struct Grid {
     contents: Vec<Vec<GridContent>>,
-    starting_point: Coordinate,
+    current_position: Coordinate,
     visited: HashSet<Coordinate>,
 }
 
@@ -51,7 +79,7 @@ impl Grid {
     fn new(input: String) -> Self {
         let input = input.trim();
         let mut contents = Vec::new();
-        let mut starting_point = Coordinate::new(0, 0);
+        let mut current_position = Coordinate::new(0, 0);
         for (y, line) in input.lines().enumerate() {
             let mut row = Vec::new();
             for (x, character) in line.chars().enumerate() {
@@ -60,7 +88,8 @@ impl Grid {
                     '#' => row.push(GridContent::Wall),
                     '^' => {
                         row.push(GridContent::Empty);
-                        starting_point = Coordinate::new(x, y);
+                        current_position =
+                            Coordinate::new(i32::try_from(x).unwrap(), i32::try_from(y).unwrap());
                     }
                     _ => {}
                 }
@@ -69,14 +98,39 @@ impl Grid {
         }
         Self {
             contents,
-            starting_point,
+            current_position,
             visited: HashSet::new(),
         }
+    }
+
+    fn run(&mut self) -> usize {
+        let mut direction = Direction::North;
+        loop {
+            let next_position = direction.walk(&self.current_position);
+            self.visited.insert(self.current_position.clone());
+            if next_position.x < 0
+                || next_position.y < 0
+                || next_position.y as usize >= self.contents.len()
+                || next_position.x as usize >= self.contents[next_position.y as usize].len()
+            {
+                break;
+            }
+            match self.contents[next_position.y as usize][next_position.x as usize] {
+                GridContent::Empty => {
+                    self.current_position = next_position;
+                }
+                GridContent::Wall => {
+                    direction = direction.turn_right();
+                }
+            }
+        }
+        return self.visited.len();
     }
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let mut grid = Grid::new(input);
+    grid.run()
 }
 
 fn part2(input: String) -> usize {
@@ -89,6 +143,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn it_turns_right() {
+        assert_eq!(Direction::East, Direction::North.turn_right());
+        assert_eq!(Direction::South, Direction::East.turn_right());
+        assert_eq!(Direction::West, Direction::South.turn_right());
+        assert_eq!(Direction::North, Direction::West.turn_right());
+    }
+
+    #[test]
     fn it_creates_coordinates() {
         assert_eq!(Coordinate::new(0, 0), Coordinate { x: 0, y: 0 });
     }
@@ -97,7 +159,7 @@ mod tests {
     fn it_creates_grids() {
         let input = "########".to_string();
         let grid = Grid::new(input);
-        assert_eq!(Coordinate::new(0, 0), grid.starting_point);
+        assert_eq!(Coordinate::new(0, 0), grid.current_position);
         assert_eq!(GridContent::Wall, grid.contents[0][0]);
         assert_eq!(0, grid.visited.len());
     }
