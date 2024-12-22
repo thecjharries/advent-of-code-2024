@@ -21,6 +21,29 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
+fn solve_equation(solution: usize, numbers: Vec<usize>) -> bool {
+    if 2 == numbers.len() {
+        if solution == numbers[0] + numbers[1] {
+            return true;
+        }
+        if solution == numbers[0] * numbers[1] {
+            return true;
+        }
+        return false;
+    }
+    let mut plus_numbers = vec![numbers[0] + numbers[1]];
+    plus_numbers.extend_from_slice(&numbers[2..]);
+    if solve_equation(solution, plus_numbers) {
+        return true;
+    }
+    let mut times_numbers = vec![numbers[0] * numbers[1]];
+    times_numbers.extend_from_slice(&numbers[2..]);
+    if solve_equation(solution, times_numbers) {
+        return true;
+    }
+    false
+}
+
 fn part1(input: String) -> usize {
     todo!()
 }
@@ -33,6 +56,12 @@ fn part2(input: String) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn it_recursively_solves_equations() {
+        assert!(solve_equation(190, vec![10, 19]));
+        assert!(!solve_equation(83, vec![17, 5]));
+    }
 
     #[test]
     fn it_solves_part1() {
