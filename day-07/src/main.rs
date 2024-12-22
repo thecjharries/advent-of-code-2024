@@ -45,7 +45,22 @@ fn solve_equation(solution: usize, numbers: Vec<usize>) -> bool {
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let input = input.trim();
+    let mut total = 0;
+    for line in input.lines() {
+        let mut parts = line.split(": ");
+        let solution = parts.next().unwrap().parse::<usize>().unwrap();
+        let numbers = parts
+            .next()
+            .unwrap()
+            .split(" ")
+            .map(|number| number.parse::<usize>().unwrap())
+            .collect();
+        if solve_equation(solution, numbers) {
+            total += solution;
+        }
+    }
+    total
 }
 
 fn part2(input: String) -> usize {
