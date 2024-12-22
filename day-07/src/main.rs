@@ -21,7 +21,18 @@ fn main() {
     println!("Part 2: {}", part2(input));
 }
 
-fn solve_equation(solution: usize, numbers: Vec<usize>) -> bool {
+fn join_two_numbers(first: usize, second: usize) -> usize {
+    let mut first_digits = first.to_string().chars().collect::<Vec<char>>();
+    let mut second_digits = second.to_string().chars().collect::<Vec<char>>();
+    first_digits.append(&mut second_digits);
+    first_digits
+        .iter()
+        .collect::<String>()
+        .parse::<usize>()
+        .unwrap()
+}
+
+fn solve_equation(solution: usize, numbers: Vec<usize>, enable_join: bool) -> bool {
     if 2 == numbers.len() {
         if solution == numbers[0] + numbers[1] {
             return true;
@@ -29,16 +40,27 @@ fn solve_equation(solution: usize, numbers: Vec<usize>) -> bool {
         if solution == numbers[0] * numbers[1] {
             return true;
         }
+        if enable_join && solution == join_two_numbers(numbers[0], numbers[1]) {
+            return true;
+        }
         return false;
     }
     let mut plus_numbers = vec![numbers[0] + numbers[1]];
     plus_numbers.extend_from_slice(&numbers[2..]);
-    if solve_equation(solution, plus_numbers) {
+    if solve_equation(solution, plus_numbers, enable_join) {
         return true;
     }
     let mut times_numbers = vec![numbers[0] * numbers[1]];
     times_numbers.extend_from_slice(&numbers[2..]);
-    if solve_equation(solution, times_numbers) {
+    if solve_equation(solution, times_numbers, enable_join) {
+        return true;
+    }
+    if !enable_join {
+        return false;
+    }
+    let mut joined_numbers = vec![join_two_numbers(numbers[0], numbers[1])];
+    joined_numbers.extend_from_slice(&numbers[2..]);
+    if enable_join && solve_equation(solution, joined_numbers, enable_join) {
         return true;
     }
     false
@@ -56,7 +78,7 @@ fn part1(input: String) -> usize {
             .split(" ")
             .map(|number| number.parse::<usize>().unwrap())
             .collect();
-        if solve_equation(solution, numbers) {
+        if solve_equation(solution, numbers, false) {
             total += solution;
         }
     }
@@ -64,7 +86,22 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let input = input.trim();
+    let mut total = 0;
+    for line in input.lines() {
+        let mut parts = line.split(": ");
+        let solution = parts.next().unwrap().parse::<usize>().unwrap();
+        let numbers = parts
+            .next()
+            .unwrap()
+            .split(" ")
+            .map(|number| number.parse::<usize>().unwrap())
+            .collect();
+        if solve_equation(solution, numbers, true) {
+            total += solution;
+        }
+    }
+    total
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -74,8 +111,9 @@ mod tests {
 
     #[test]
     fn it_recursively_solves_equations() {
-        assert!(solve_equation(190, vec![10, 19]));
-        assert!(!solve_equation(83, vec![17, 5]));
+        assert!(solve_equation(190, vec![10, 19], false));
+        assert!(!solve_equation(83, vec![17, 5], false));
+        assert!(solve_equation(156, vec![15, 6], true));
     }
 
     #[test]
@@ -83,6 +121,25 @@ mod tests {
         assert_eq!(
             3749,
             part1(
+                "190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20"
+                    .to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn it_solves_part2() {
+        assert_eq!(
+            11387,
+            part2(
                 "190: 10 19
 3267: 81 40 27
 83: 17 5
