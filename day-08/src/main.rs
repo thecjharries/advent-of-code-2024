@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
+use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 use std::fs::read_to_string;
 
 #[cfg(not(tarpaulin_include))]
@@ -34,22 +35,58 @@ impl Coordinate {
     }
 }
 
-fn parse_part1_map(input: String) -> HashMap<char, Vec<Coordinate>> {
+fn parse_part1_map(input: String) -> (HashMap<char, Vec<Coordinate>>, i32, i32) {
     let mut map = HashMap::new();
     let lines = input.trim().split("\n");
+    let mut height = 0;
+    let mut width = 0;
     for (y, line) in lines.enumerate() {
+        height = y;
         for (x, character) in line.chars().enumerate() {
+            width = x;
             if character.is_alphanumeric() {
                 let coordinates = map.entry(character).or_insert_with(Vec::new);
                 coordinates.push(Coordinate::new(x as i32, y as i32));
             }
         }
     }
-    map
+    (map, width as i32, height as i32)
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let mut antinodes: HashSet<Coordinate> = HashSet::new();
+    let (map, width, height) = parse_part1_map(input);
+    for key in map.keys() {
+        let node_coordinates = map.get(key).unwrap();
+        for pair in node_coordinates.iter().combinations(2) {
+            let (first, second) = (pair[0], pair[1]);
+            let x_diff = (first.x - second.x).abs();
+            let y_diff = (first.y - second.y).abs();
+            let x_step = if first.x < second.x { 1 } else { -1 };
+            let y_step = if first.y < second.y { 1 } else { -1 };
+            if first.x - x_step * x_diff >= 0
+                && first.x - x_step * x_diff <= width
+                && first.y - y_step * y_diff >= 0
+                && first.y - y_step * y_diff <= height
+            {
+                antinodes.insert(Coordinate::new(
+                    first.x - x_step * x_diff,
+                    first.y - y_step * y_diff,
+                ));
+            }
+            if second.x + x_step * x_diff >= 0
+                && second.x + x_step * x_diff <= width
+                && second.y + y_step * y_diff >= 0
+                && second.y + y_step * y_diff <= height
+            {
+                antinodes.insert(Coordinate::new(
+                    second.x + x_step * x_diff,
+                    second.y + y_step * y_diff,
+                ));
+            }
+        }
+    }
+    antinodes.len()
 }
 
 fn part2(input: String) -> usize {
@@ -87,7 +124,7 @@ mod tests {
             ],
         );
         assert_eq!(
-            expected,
+            (expected, 11, 11),
             parse_part1_map(
                 "............
 ........0...
