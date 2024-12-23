@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
 use std::fs::read_to_string;
 
 #[cfg(not(tarpaulin_include))]
@@ -19,6 +20,22 @@ fn main() {
     let input = read_to_string("input.txt").expect("Unable to read input file");
     println!("Part 1: {}", part1(input.clone()));
     println!("Part 2: {}", part2(input));
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+struct Coordinate {
+    x: i32,
+    y: i32,
+}
+
+impl Coordinate {
+    pub fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+}
+
+fn parse_part1_map(input: String) -> HashMap<char, Vec<Coordinate>> {
+    return HashMap::new();
 }
 
 fn part1(input: String) -> usize {
@@ -33,6 +50,11 @@ fn part2(input: String) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn it_creates_new_coordinates() {
+        assert_eq!(Coordinate { x: 1, y: 2 }, Coordinate::new(1, 2));
+    }
 
     #[test]
     fn it_solves_part1() {
