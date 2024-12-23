@@ -35,7 +35,17 @@ impl Coordinate {
 }
 
 fn parse_part1_map(input: String) -> HashMap<char, Vec<Coordinate>> {
-    return HashMap::new();
+    let mut map = HashMap::new();
+    let lines = input.trim().split("\n");
+    for (y, line) in lines.enumerate() {
+        for (x, character) in line.chars().enumerate() {
+            if character.is_alphanumeric() {
+                let coordinates = map.entry(character).or_insert_with(Vec::new);
+                coordinates.push(Coordinate::new(x as i32, y as i32));
+            }
+        }
+    }
+    map
 }
 
 fn part1(input: String) -> usize {
@@ -54,6 +64,46 @@ mod tests {
     #[test]
     fn it_creates_new_coordinates() {
         assert_eq!(Coordinate { x: 1, y: 2 }, Coordinate::new(1, 2));
+    }
+
+    #[test]
+    fn it_creates_coordinate_hashmaps() {
+        let mut expected = HashMap::new();
+        expected.insert(
+            '0',
+            vec![
+                Coordinate::new(8, 1),
+                Coordinate::new(5, 2),
+                Coordinate::new(7, 3),
+                Coordinate::new(4, 4),
+            ],
+        );
+        expected.insert(
+            'A',
+            vec![
+                Coordinate::new(6, 5),
+                Coordinate::new(8, 8),
+                Coordinate::new(9, 9),
+            ],
+        );
+        assert_eq!(
+            expected,
+            parse_part1_map(
+                "............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............"
+                    .to_string()
+            )
+        );
     }
 
     #[test]
