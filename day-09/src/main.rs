@@ -27,6 +27,12 @@ enum File {
     Block(usize),
 }
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+enum Partition {
+    Block(usize, usize),
+    Empty(usize),
+}
+
 fn part1(input: String) -> usize {
     let numbers: Vec<usize> = input
         .trim()
@@ -83,7 +89,85 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let numbers: Vec<usize> = input
+        .trim()
+        .chars()
+        .map(|x| {
+            x.to_string()
+                .parse::<usize>()
+                .expect("Unable to parse number")
+        })
+        .collect();
+    let mut index = 0;
+    let mut is_block = true;
+    let mut filesystem: Vec<Partition> = Vec::new();
+    for number in numbers.iter() {
+        if is_block {
+            filesystem.push(Partition::Block(*number, index));
+            index += 1;
+        } else {
+            filesystem.push(Partition::Empty(*number));
+        }
+        is_block = !is_block;
+    }
+    let mut current_move_index = index - 1;
+    while current_move_index > 0 {
+        let mut right_index = filesystem.len() - 1;
+        loop {
+            match filesystem[right_index] {
+                Partition::Empty(_) => {
+                    right_index -= 1;
+                }
+                Partition::Block(_, block_index) => {
+                    if block_index == current_move_index {
+                        break;
+                    } else {
+                        right_index -= 1;
+                    }
+                }
+            }
+        }
+        let mut left_index = 0;
+        while left_index < right_index {
+            match filesystem[left_index] {
+                Partition::Empty(empty_size) => {
+                    if let Partition::Block(block_size, block_index) = filesystem[right_index] {
+                        if empty_size >= block_size {
+                            let mut new_filesystem = filesystem[..left_index].to_vec();
+                            new_filesystem.push(Partition::Block(block_size, block_index));
+                            if empty_size > block_size {
+                                new_filesystem.push(Partition::Empty(empty_size - block_size));
+                            }
+                            new_filesystem.extend(filesystem[left_index + 1..right_index].to_vec());
+                            new_filesystem.push(Partition::Empty(block_size));
+                            new_filesystem.extend(filesystem[right_index + 1..].to_vec());
+                            filesystem = new_filesystem;
+                        }
+                    }
+                    left_index += 1;
+                }
+                Partition::Block(_, _) => {
+                    left_index += 1;
+                }
+            }
+        }
+        current_move_index -= 1;
+    }
+    let mut index = 0;
+    filesystem.into_iter().fold(0, |acc, x| match x {
+        Partition::Empty(size) => {
+            index += size;
+            acc
+        }
+        Partition::Block(size, contents) => {
+            let mut sum = acc;
+            for _ in 0..size {
+                sum += index * contents;
+                index += 1;
+            }
+            sum
+        }
+    })
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -94,5 +178,10 @@ mod tests {
     #[test]
     fn it_solves_part1() {
         assert_eq!(1928, part1("2333133121414131402".to_string()))
+    }
+
+    #[test]
+    fn it_solves_part2() {
+        assert_eq!(2858, part2("2333133121414131402".to_string()))
     }
 }
