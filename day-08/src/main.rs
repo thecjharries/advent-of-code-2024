@@ -90,7 +90,35 @@ fn part1(input: String) -> usize {
 }
 
 fn part2(input: String) -> usize {
-    todo!()
+    let mut antinodes: HashSet<Coordinate> = HashSet::new();
+    let (map, width, height) = parse_part1_map(input);
+    for key in map.keys() {
+        let node_coordinates = map.get(key).unwrap();
+        antinodes.extend(node_coordinates.iter().cloned());
+        for pair in node_coordinates.iter().combinations(2) {
+            let (first, second) = (pair[0], pair[1]);
+            let x_diff = (first.x - second.x).abs();
+            let y_diff = (first.y - second.y).abs();
+            let x_step = if first.x < second.x { 1 } else { -1 };
+            let y_step = if first.y < second.y { 1 } else { -1 };
+            let mut antinode =
+                Coordinate::new(first.x - x_step * x_diff, first.y - y_step * y_diff);
+            while antinode.x >= 0 && antinode.x <= width && antinode.y >= 0 && antinode.y <= height
+            {
+                antinodes.insert(antinode.clone());
+                antinode =
+                    Coordinate::new(antinode.x - x_step * x_diff, antinode.y - y_step * y_diff);
+            }
+            antinode = Coordinate::new(second.x + x_step * x_diff, second.y + y_step * y_diff);
+            while antinode.x >= 0 && antinode.x <= width && antinode.y >= 0 && antinode.y <= height
+            {
+                antinodes.insert(antinode.clone());
+                antinode =
+                    Coordinate::new(antinode.x + x_step * x_diff, antinode.y + y_step * y_diff);
+            }
+        }
+    }
+    antinodes.len()
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -148,6 +176,28 @@ mod tests {
         assert_eq!(
             14,
             part1(
+                "............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............"
+                    .to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn it_solves_part2() {
+        assert_eq!(
+            34,
+            part2(
                 "............
 ........0...
 .....0......
