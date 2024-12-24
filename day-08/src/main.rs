@@ -118,6 +118,7 @@ fn part2(input: String) -> usize {
             }
         }
     }
+
     antinodes.len()
 }
 
