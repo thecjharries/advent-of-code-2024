@@ -33,4 +33,9 @@ fn part2(input: String) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn it_solves_part1() {
+        assert_eq!(55312, part1("125 17".to_string()))
+    }
 }
