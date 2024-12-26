@@ -22,7 +22,38 @@ fn main() {
 }
 
 fn part1(input: String) -> usize {
-    todo!()
+    let mut numbers = input
+        .trim()
+        .split_whitespace()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect::<Vec<usize>>();
+    for _ in 0..25 {
+        let mut new_numbers = Vec::new();
+        for element in numbers.iter() {
+            if 0 == *element {
+                new_numbers.push(1);
+            } else if 0 == element.to_string().len() % 2 {
+                let characters = element.to_string().chars().collect::<Vec<char>>();
+                let half = characters.len() / 2;
+                let first_half = characters[0..half]
+                    .iter()
+                    .collect::<String>()
+                    .parse::<usize>()
+                    .unwrap();
+                let second_half = characters[half..]
+                    .iter()
+                    .collect::<String>()
+                    .parse::<usize>()
+                    .unwrap();
+                new_numbers.push(first_half);
+                new_numbers.push(second_half);
+            } else {
+                new_numbers.push(2024 * *element);
+            }
+        }
+        numbers = new_numbers;
+    }
+    numbers.len()
 }
 
 fn part2(input: String) -> usize {
