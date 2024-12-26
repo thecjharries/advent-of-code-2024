@@ -29,9 +29,6 @@ struct Coordinate {
 }
 
 fn get_neighbors(coordinate: Coordinate, grid: &Vec<Vec<usize>>) -> HashSet<Coordinate> {
-    if 9 == grid[coordinate.y][coordinate.x] {
-        return HashSet::new();
-    }
     let mut neighbors = HashSet::new();
     if 0 < coordinate.x
         && grid[coordinate.y][coordinate.x - 1] == grid[coordinate.y][coordinate.x] + 1
@@ -99,8 +96,35 @@ fn part1(input: String) -> usize {
     trails
 }
 
+fn count_trails(start: Coordinate, grid: &Vec<Vec<usize>>) -> usize {
+    let mut trails = 0;
+    if 9 == grid[start.y][start.x] {
+        trails += 1;
+    } else {
+        for neighbor in get_neighbors(start, grid) {
+            trails += count_trails(neighbor, grid);
+        }
+    }
+    return trails;
+}
+
 fn part2(input: String) -> usize {
-    todo!()
+    let mut grid: Vec<Vec<usize>> = Vec::new();
+    let mut trailheads: Vec<Coordinate> = Vec::new();
+    for (y, line) in input.trim().lines().enumerate() {
+        grid.push(Vec::new());
+        for (x, character) in line.chars().enumerate() {
+            grid[y].push(character.to_digit(10).unwrap() as usize);
+            if 0 == grid[y][x] {
+                trailheads.push(Coordinate { x, y });
+            }
+        }
+    }
+    let mut trails = 0;
+    for trailhead in trailheads {
+        trails += count_trails(trailhead, &grid);
+    }
+    trails
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -147,5 +171,23 @@ mod tests {
                     .to_string()
             )
         )
+    }
+
+    #[test]
+    fn it_solves_part2() {
+        assert_eq!(
+            81,
+            part2(
+                "89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732"
+                    .to_string()
+            )
+        );
     }
 }
